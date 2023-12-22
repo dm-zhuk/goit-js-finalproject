@@ -43,28 +43,36 @@ function handlerGalleryClick(event) {
   if (event.target.closest(".gallery__item")) {
     const largeImageSrc = event.target.dataset.source;
 
-    // Initialize BasicLightbox
-    const lightbox = basicLightbox.create(
+    /* Initialize BasicLightbox
+     слухача клавіатури потрібно ставити при відкритті модального вікна, а знімати при закритті модального вікна. Для цього потрібно використати обʼєкт налаштувань бібліотеки, а саме ключики onShow i onClose. */
+
+    const instance = basicLightbox.create(
       `
-      <img src="${largeImageSrc}" alt="" />
-    `
+        <img src="${largeImageSrc}" alt="" />
+      `,
+      {
+        handler: null,
+        onShow(instance) {
+          console.log(this);
+          this.handler = onEscape.bind(instance);
+          document.addEventListener("keydown", this.handler);
+        },
+        onClose() {
+          document.removeEventListener("keydown", this.handler);
+        },
+      }
     );
 
-    const closeLightbox = () => lightbox.close();
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") {
-        closeLightbox();
-        window.removeEventListener("keydown", handleKeyDown);
-      }
-    };
+    instance.show();
+  }
 
-    lightbox.show(() => {
-      console.log("lightbox now visible");
-      window.addEventListener("keydown", handleKeyDown);
-    });
+  function onEscape({ code }) {
+    if (code === "Escape") {
+      console.log(this);
+      this.close();
+    }
   }
 }
 
-console.log(galleryItems);
-
+// console.log(galleryItems);
 // console.log(basicLightbox);
